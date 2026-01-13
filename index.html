@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morphology Final Exam Quiz</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --bg: #f5f7f9;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 10px;
+            font-size: 14px;
+            color: #333;
+        }
+        .container {
+            max-width: 850px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--primary);
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+        }
+        header h1 { font-size: 22px; color: var(--primary); margin: 0; }
+        header p { color: #666; font-size: 13px; }
+
+        .question-card {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #edf2f7;
+            border-radius: 8px;
+            background: #fafbfc;
+            page-break-inside: avoid;
+        }
+        .q-text { font-weight: 600; font-size: 15px; margin-bottom: 12px; color: var(--secondary); }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .option {
+            background: #fff;
+            border: 1px solid #d1d9e0;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        .option:hover { background: #f0f4f8; border-color: var(--accent); }
+        .option input { margin-right: 10px; cursor: pointer; }
+
+        #submit-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 30px;
+        }
+        #submit-btn:hover { background: var(--secondary); }
+
+        /* Result Section */
+        #result-screen { display: none; }
+        .score-box {
+            text-align: center;
+            padding: 20px;
+            background: var(--primary);
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .score-val { font-size: 40px; font-weight: bold; }
+        .review-card {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid #ccc;
+        }
+        .correct-review { border-left-color: var(--success); background: #f0fff4; }
+        .wrong-review { border-left-color: var(--danger); background: #fff5f5; }
+        .correct-text { color: var(--success); font-weight: bold; }
+        .wrong-text { color: var(--danger); font-weight: bold; }
+        
+        @media (max-width: 600px) {
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="quiz-container">
+    <header>
+        <h1>Morphology Comprehensive Quiz</h1>
+        <p>Contains all questions from S1, S2, S3, S4, S5 & Appendix</p>
+    </header>
+
+    <div id="questions-area"></div>
+    <button id="submit-btn" onclick="showResults()">Submit My Answers</button>
+
+    <div id="result-screen">
+        <div class="score-box">
+            <div>Your Final Score</div>
+            <div class="score-val" id="final-score">0 / 85</div>
+        </div>
+        <div id="detailed-review"></div>
+        <button id="submit-btn" onclick="location.reload()">Restart Quiz</button>
+    </div>
+</div>
+
+<script>
+    const allQuestions = [
+        // S3 Questions
+        {q: "Free morphemes are those that", opts: ["Must attach to other morphemes", "Can stand alone as words", "Have no meaning by themselves", "Only appear as suffixes"], ans: 1},
+        {q: "The word “ fertilizer ” contains", opts: ["One affix", "Two affixes", "Three affixes", "No affix"], ans: 1},
+        {q: "Inflectional morphemes show", opts: ["Grammatical relationships", "New meanings", "Change of word class", "None of the above"], ans: 0},
+        {q: "The morpheme –s in “cats” expresses", opts: ["Tense", "Case", "Number", "Comparison"], ans: 2},
+        {q: "In the word “ bigger ” , the –er is", opts: ["Derivational", "Inflectional", "Prefix", "Root"], ans: 1},
+        {q: "The word “carelessness” contains", opts: ["one affix", "two affixes", "three affixes", "no affix"], ans: 1},
+        {q: "The word “ encouragement ” has", opts: ["only a suffix", "only a prefix", "both a prefix and a suffix", "No suffix"], ans: 2},
+        // Appendix Questions
+        {q: "The term suffixal homophones are suffixes that", opts: ["Have different spellings and meanings", "Have the same pronunciation but different functions", "Occur only in verbs", "Always indicate tense", "Belong only to closed classes"], ans: 1},
+        {q: "Which function does the suffix -s perform in 'she walks'?", opts: ["Plural marking", "Possession", "Third person singular present", "Past tense", "Derivation"], ans: 2},
+        {q: "The suffix -ed in 'worked' is best described as", opts: ["Derivational and class-changing", "Inflectional and tense-marking", "Derivational and nominal", "Inflectional and comparative", "Lexical and productive"], ans: 1},
+        {q: "Which example shows -ed as an adjective-forming suffix?", opts: ["He worked late.", "She has finished.", "A tired student", "They were called.", "He edited the text."], ans: 2},
+        {q: "The suffix -ly in quickly is:", opts: ["Inflectional", "Nominal", "Adverb-forming", "Comparative", "Plural"], ans: 2},
+        {q: "Which word contains -ly that is not an adverbial suffix?", opts: ["Quickly", "Slowly", "Happily", "Friendly", "Carefully"], ans: 3},
+        {q: "Which suffixal homophone marks possession?", opts: ["-s in walks", "-s in books", "-’s in Ali’s", "-ed in worked", "-er in teacher"], ans: 2},
+        // S4 Questions
+        {q: "Bound morphemes are", opts: ["Morphemes that can appear alone", "Always prefixes", "Morphemes that must be attached to others", "Complete words"], ans: 2},
+        {q: "How many bound morphemes are there in the word 'activities'?", opts: ["One", "Two", "Three", "Four"], ans: 2},
+        {q: "Derivational morphemes are used to", opts: ["Indicate tense", "Form new words", "Show agreement", "Mark plurality"], ans: 1},
+        {q: "The morpheme –er in 'taller' expresses", opts: ["Comparison", "Plurality", "Possession", "Tense"], ans: 0},
+        {q: "A prefix is added to", opts: ["the end of a base", "the middle of a word", "the beginning of a base", "all English words"], ans: 2},
+        {q: "Which of the following words has both a prefix and a suffix?", opts: ["Dislike", "Happiness", "Unfriendly", "Mislead"], ans: 2},
+        {q: "Which of the following words has neither a prefix nor a suffix?", opts: ["playful", "beauty", "disagreement", "sadness"], ans: 1},
+        // S2 Questions
+        {q: "A morpheme is", opts: ["The smallest unit of sound", "The smallest meaningful unit in language", "A group of related words", "A phrase expressing one idea"], ans: 1},
+        {q: "The word 'disagreeable' consists of", opts: ["two morphemes", "Three morphemes", "Four morphemes", "One morpheme"], ans: 1},
+        {q: "Which of the following is a derivational morpheme?", opts: ["played", "boys", "teacher", "bigger"], ans: 2},
+        {q: "The morpheme –ing in 'He was running' shows", opts: ["Past tense", "Continuous aspect", "Plurality", "Case"], ans: 1},
+        {q: "Which kind of affix is found in the word 'misunderstand'?", opts: ["Suffix", "Prefix", "Both prefix and suffix", "None"], ans: 1},
+        {q: "Which of the following words has an 'inflectional' suffix?", opts: ["sickness", "cheaper", "careful", "active"], ans: 1},
+        // S1 2026 Questions
+        {q: "Morphology is the study of", opts: ["Sentence structure", "Word structure and formation", "Sound patterns", "Meaning of phrases"], ans: 1},
+        {q: "The word 'teachers' contains", opts: ["One morpheme", "Two morphemes", "Three morphemes", "Four morphemes"], ans: 2},
+        {q: "The root morpheme of 'unhappiness' is", opts: ["un-", "-ness", "happy", "none of these"], ans: 2},
+        {q: "Which of the following is inflectional?", opts: ["kindness", "smaller", "beautiful", "agreement"], ans: 1},
+        {q: "The morpheme –ed in 'stayed' expresses", opts: ["Present tense", "Past tense", "Future tense", "Progressive aspect"], ans: 1},
+        {q: "A suffix is added to", opts: ["the end of a word", "the beginning of a word", "both ends", "a phrase"], ans: 0},
+        {q: "The root morpheme of 'reaction' is", opts: ["re-", "act", "ion", "react"], ans: 1},
+        // S5 Questions (53 items)
+        {q: "Words consist of a single free morpheme only are:", opts: ["Complex", "Compound", "Simple", "Derived"], ans: 2},
+        {q: "Words containing two bound forms or a bound and a free form are:", opts: ["Complex", "Compound", "Simple", "Derived"], ans: 0},
+        {q: "The process of forming new words by adding prefixes or suffixes is:", opts: ["Compounding", "Conversion", "Affixation", "Blending"], ans: 2},
+        {q: "The word unhappiness is formed through:", opts: ["Compounding", "Affixation", "Conversion", "Borrowing"], ans: 1},
+        {q: "Which word is an example of compounding?", opts: ["Whiteboard", "Teacher", "Happiness", "Quickly"], ans: 0},
+        {q: "In word formation, conversion means:", opts: ["Adding affixes", "Borrowing", "Changing word's class without form change", "Shortening"], ans: 2},
+        {q: "The noun 'water' used as a verb (to water) illustrates:", opts: ["Blending", "Conversion", "Compounding", "Clipping"], ans: 1},
+        {q: "Which word is formed by blending?", opts: ["Breakfast", "Brunch", "Editor", "Teacher"], ans: 1},
+        {q: "The word smog comes from smoke + fog. This is:", opts: ["Compounding", "Clipping", "Blending", "Acronym"], ans: 2},
+        {q: "Which of the following is a clipped word?", opts: ["lab", "Blackboard", "Happiness", "Rewrite"], ans: 0},
+        {q: "The process that shortens longer words is called:", opts: ["Back-formation", "Conversion", "Clipping", "Borrowing"], ans: 2},
+        {q: "The word editor giving rise to 'edit' is an example of:", opts: ["Conversion", "Back-formation", "Blending", "Affixation"], ans: 1},
+        {q: "Back-formation usually involves:", opts: ["Adding prefixes", "Removing affixes", "Combining words", "Borrowing"], ans: 1},
+        {q: "Which word is formed through borrowing?", opts: ["Teacher", "Bazar", "Happiness", "Quickly"], ans: 1},
+        {q: "English borrowed the word 'piano' from:", opts: ["French", "German", "Italian", "Spanish"], ans: 2},
+        {q: "Which process creates words like UN and NASA?", opts: ["Blending", "Clipping", "Acronymy", "Compounding"], ans: 2},
+        {q: "An acronym is formed from:", opts: ["Prefixes only", "Final letters", "Initial letters", "Syllables"], ans: 2},
+        {q: "Which word is an acronym?", opts: ["Lab", "Radar", "Smog", "Classroom"], ans: 1},
+        {q: "The word teacher is formed by:", opts: ["Compounding", "Conversion", "Affixation", "Blending"], ans: 2},
+        {q: "Adding -ness to happy is an example of:", opts: ["Inflection", "Derivation", "Conversion", "Compounding"], ans: 1},
+        {q: "Which suffix forms nouns from adjectives?", opts: ["-ly", "-ness", "-ed", "-er"], ans: 1},
+        {q: "The process of forming a verb from a noun without affixes is:", opts: ["Compounding", "Conversion", "Blending", "Borrowing"], ans: 1},
+        {q: "Which word is formed by derivation?", opts: ["Teacher", "Lab", "Smog", "Phone"], ans: 0},
+        {q: "The prefix re- in rewrite indicates:", opts: ["Negation", "Time", "Repetition", "Place"], ans: 2},
+        {q: "Which word involves two free morphemes?", opts: ["Happiness", "Rewrite", "Blackboard", "Teacher"], ans: 2},
+        {q: "Which is NOT a process of word formation?", opts: ["Borrowing", "Conversion", "Inflection", "Compounding"], ans: 2},
+        {q: "The word advert from advertisement is an example of:", opts: ["Blending", "Back-formation", "Clipping", "Acronym"], ans: 2},
+        {q: "Which word shows prefixation only?", opts: ["Happiness", "Disagree", "Teacher", "Childhood"], ans: 1},
+        {q: "The process of forming plural nouns by -s is called:", opts: ["Derivation", "Compounding", "Inflection", "Conversion"], ans: 2},
+        {q: "Which is the most productive process in modern English?", opts: ["Borrowing", "Compounding", "Derivation", "Clipping"], ans: 2},
+        {q: "What forms a new lexeme by attaching a bound morpheme to a base?", opts: ["Conversion", "Compounding", "Derivation", "Clipping"], ans: 2},
+        {q: "In the word nationalization, there are ___ derivational morphemes:", opts: ["One", "Two", "Three", "Four"], ans: 2},
+        {q: "What criterion distinguishes derivational affixes from inflectional ones?", opts: ["Position", "Phonological shape", "Ability to change word class", "Origin"], ans: 2},
+        {q: "Which word contains both prefixation and suffixation?", opts: ["Disagreement", "Teacher", "Childhood", "Laboratory"], ans: 0},
+        {q: "In computerize, the suffix -ize primarily signals:", opts: ["Inflection", "Nominalization", "Verbalization", "Comparison"], ans: 2},
+        {q: "The words 'text' and 'book' functioning as verbs exemplifies:", opts: ["Derivation", "Conversion", "Compounding", "Blending"], ans: 1},
+        {q: "Word-formation primarily serves to:", opts: ["Preserve history", "Regulate sounds", "Expand the lexicon", "Reduce ambiguity"], ans: 2},
+        {q: "Complex words can be illustrated in:", opts: ["campus", "undergo", "UAE", "telephone"], ans: 3},
+        {q: "Compound words can be illustrated in:", opts: ["greenhouse", "sadness", "nylon", "televise"], ans: 0},
+        {q: "Which word is an example of borrowing?", opts: ["Undergo", "Chauffeur", "Smog", "telephone"], ans: 1},
+        {q: "Joining of two or more words into a single word (e.g. cornflakes) is:", opts: ["Derivation", "Conversion", "Compounding", "Blending"], ans: 2},
+        {q: "Combining derivational affixes/bound bases with existing words is:", opts: ["Borrowing", "Compounding", "Clipping", "Blending", "Derivation"], ans: 4},
+        {q: "Which is an example of invention?", opts: ["Nylon", "NATO", "Classroom", "Lab"], ans: 0},
+        {q: "Formation of words whose sound suggests their meaning is:", opts: ["Derivation", "Echoism", "Acronymy", "Blending"], ans: 1},
+        {q: "Cutting off parts of a word to leave a part for the whole is:", opts: ["Invention", "Conversion", "Echoism", "Clipping"], ans: 3},
+        {q: "Process where word is formed from initials/beginning segments is:", opts: ["Derivation", "Clipping", "Compounding", "Back-formation", "Acronymy"], ans: 4},
+        {q: "NATO and UNESCO are clear examples of:", opts: ["Compounding", "Conversion", "Acronymy", "Echoism"], ans: 2},
+        {q: "Fusion of first part of one word with last part of another is:", opts: ["Clipping", "Conversion", "Compounding", "Back-formation", "Blending"], ans: 4},
+        {q: "The words 'smog' and 'stagflation' are examples of:", opts: ["Blending", "Conversion", "Compounding", "Clipping"], ans: 0},
+        {q: "Formation of 'edit' from 'editor' or 'greed' from 'greedy' is:", opts: ["Back-formation", "Conversion", "Compounding", "Acronymy"], ans: 0},
+        {q: "Formation of common noun/verb from name of a person or place is:", opts: ["Invention", "Conversion", "Echoism", "Antonomasia"], ans: 3},
+        {q: "Forming a word by doubling a morpheme (e.g. tiptop) is:", opts: ["Invention", "Reduplication", "Echoism", "Blending"], ans: 1},
+        {q: "Changing a word to make it more like familiar words is:", opts: ["Invention", "folk etymology", "Echoism", "Blending"], ans: 1}
+    ];
+
+    // Function to Shuffle the Array
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    shuffle(allQuestions);
+
+    function renderQuiz() {
+        const area = document.getElementById('questions-area');
+        allQuestions.forEach((q, i) => {
+            let optsHtml = '';
+            q.opts.forEach((opt, oi) => {
+                optsHtml += `
+                    <label class="option">
+                        <input type="radio" name="q${i}" value="${oi}"> ${opt}
+                    </label>
+                `;
+            });
+            area.innerHTML += `
+                <div class="question-card" id="card${i}">
+                    <div class="q-text">${i + 1}. ${q.q}</div>
+                    <div class="options-grid">${optsHtml}</div>
+                </div>
+            `;
+        });
+    }
+
+    function showResults() {
+        let score = 0;
+        const review = document.getElementById('detailed-review');
+        review.innerHTML = '<h3>Detailed Review:</h3>';
+
+        allQuestions.forEach((q, i) => {
+            const selected = document.querySelector(`input[name="q${i}"]:checked`);
+            const userIdx = selected ? parseInt(selected.value) : -1;
+            const isCorrect = userIdx === q.ans;
+            
+            if (isCorrect) score++;
+
+            const statusClass = isCorrect ? 'correct-review' : 'wrong-review';
+            const userLabel = userIdx !== -1 ? q.opts[userIdx] : "No Answer Selected";
+            
+            review.innerHTML += `
+                <div class="review-card ${statusClass}">
+                    <div><strong>Q${i+1}: ${q.q}</strong></div>
+                    <div class="${isCorrect ? 'correct-text' : 'wrong-text'}">
+                        Your Answer: ${userLabel}
+                    </div>
+                    ${!isCorrect ? `<div class="correct-text">Correct Answer: ${q.opts[q.ans]}</div>` : ''}
+                </div>
+            `;
+        });
+
+        document.getElementById('questions-area').style.display = 'none';
+        document.getElementById('submit-btn').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        document.getElementById('final-score').innerText = `${score} / ${allQuestions.length}`;
+        window.scrollTo(0, 0);
+    }
+
+    renderQuiz();
+</script>
+
+</body>
+</html>
